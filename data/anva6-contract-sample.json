@@ -1,0 +1,194 @@
+{
+  "allowBack": false,
+  "configKey": "hullCaravanIntermediary",
+  "configTitle": "022 - Casco caravan (intermediair)",
+  "createdAt": "2026-03-12T09:14:00Z",
+  "currentState": "final",
+  "currentStateTitle": "Final Entity",
+  "entityId": "ctr-2041",
+  "isDraft": false,
+  "isValidNow": true,
+  "validFrom": "2026-04-01T00:00:00Z",
+  "validTo": null,
+  "versionId": "v-2041-c",
+  "versionTag": 2,
+  "data": {
+    "id": "ctr-2041",
+    "contractNumber": "CAR-2026-004417",
+    "oldContractNumber": "CAR-2023-001902",
+    "startDate": "2026-04-01",
+    "endDate": "2027-04-01",
+    "statusType": "inForce",
+    "sequenceNumber": 3,
+    "netAnnualPremium": 486.2,
+    "grossPremiumInstallment": 49.05,
+    "netPremiumInstallment": 40.52,
+    "totalInstallmentAmount": 49.05,
+    "insuranceTaxInstallmentAmount": 8.53,
+    "paymentTermInMonths": "1",
+    "premiumCollector": "intermediary",
+    "collectionMethod": "directDebit",
+    "policyPartOfPackage": false,
+    "standardCommission": true,
+    "renewalCommissionPercentage": 15.0,
+    "indexLinked": "Y",
+    "privateOrCommercialProduct": "private",
+    "customerReference": "KLANT-88213-CV",
+    "productInformation": {
+      "productCode": "CAR-HULL-INT",
+      "productName": "Casco caravan (intermediair)",
+      "productDescription": "Cascoverzekering voor caravans, gesloten via een tussenpersoon",
+      "businessLine": "022",
+      "porCompany": "M027"
+    },
+    "contractPeriod": {
+      "effectiveDate": "2026-04-01",
+      "expiryDate": "2027-04-01",
+      "contractDurationInMonths": 12,
+      "noticePeriodInDays": 30
+    },
+    "contractAmounts": {
+      "contractInstallmentAmounts": {
+        "contractCosts": {
+          "netPolicyCosts": 4.5,
+          "policyCostsTaxAmount": 0.95,
+          "invoicePolicyCosts": 5.45
+        },
+        "cumulativePremiumAmounts": {
+          "taxAmount": 83.35,
+          "grossPremiumInstallment": 480.25,
+          "netAnnualPremium": 396.9
+        }
+      },
+      "contractPeriodAmounts": {
+        "contractCosts": {
+          "netPolicyCosts": 4.5,
+          "policyCostsTaxAmount": 0.95,
+          "invoicePolicyCosts": 5.45
+        },
+        "cumulativePremiumAmounts": {
+          "taxAmount": 83.35,
+          "grossPremiumInstallment": 480.25,
+          "netAnnualPremium": 396.9
+        }
+      }
+    },
+    "parties": [
+      {
+        "sequenceNumber": 1,
+        "_discriminator": "policyHolder",
+        "partyType": "PERSON",
+        "person": "v-001-a",
+        "privateOrCommercial": "private"
+      },
+      {
+        "_discriminator": "intermediary",
+        "partyType": "ORGANIZATION",
+        "organization": "v-042-a"
+      }
+    ],
+    "subjects": [
+      {
+        "sequenceNumber": 1,
+        "_discriminator": "caravan",
+        "licensePlate": "XX-123-Y",
+        "chassisNumber": "WCV00000000012345",
+        "make": "Example Caravans",
+        "model": "Tourer 450",
+        "constructionYear": 2019,
+        "purchaseDate": "2021-04-12",
+        "purchaseAmount": 18500.0,
+        "vatIncluded": "Y",
+        "objectUse": "private",
+        "objectRentedOut": false,
+        "appraisalValue": 16200.0,
+        "valueExtraAccessories": 1450.0
+      }
+    ],
+    "articles": [
+      {
+        "_discriminator": "hull",
+        "coverageCode": "2002",
+        "netInvoiceAmount": 312.4,
+        "discount": 0.0,
+        "taxCode": 0.21,
+        "taxAmount": 65.6,
+        "coveragePremiumCalculation": {
+          "effectiveStartDate": "2026-04-01",
+          "adjustmentFactor": 1.0,
+          "collectivityFactor": 1.0
+        },
+        "intermediaryCommission": {
+          "intermediaryCommissionPercentage": 15.0,
+          "intermediaryCommissionBase": "NET_PREMIUM"
+        },
+        "sumInsured": 17650.0,
+        "deductibleAmount": 150.0,
+        "numberOfMonthsPurchaseValueGuarantee": 36,
+        "clauses": [
+          {
+            "sequenceNumber": 1,
+            "number": "CL-CAR-07",
+            "version": "2024-01",
+            "textShort": "Winterstalling verplicht op een afgesloten terrein"
+          }
+        ]
+      },
+      {
+        "sequenceNumber": 2,
+        "_discriminator": "breakdownAssistance",
+        "coverageCode": "2049",
+        "netInvoiceAmount": 48.0,
+        "taxCode": 0.21,
+        "taxAmount": 10.08,
+        "typeOfCalculationAtRenewal": "INDEXED"
+      },
+      {
+        "_discriminator": "purchaseValueGuarantee",
+        "coverageCode": "2041",
+        "netInvoiceAmount": 36.5,
+        "taxCode": 0.21,
+        "taxAmount": 7.67,
+        "replacementValueTermInYears": 3,
+        "intermediaryCommission": {
+          "intermediaryCommissionPercentage": 15.0,
+          "intermediaryCommissionBase": "NET_PREMIUM"
+        }
+      }
+    ],
+    "clauses": [
+      {
+        "sequenceNumber": 1,
+        "number": "CL-ALG-01",
+        "version": "2023-07",
+        "textShort": "Algemene clausule caravanverzekering",
+        "name": "Algemeen",
+        "textFull": "Op deze verzekering zijn de algemene voorwaarden van toepassing.",
+        "description": "Standaardclausule op elk caravancontract"
+      }
+    ],
+    "termsAndConditions": [
+      {
+        "sequenceNumber": 1,
+        "number": "PVW-CAR-2025-01",
+        "version": "2025-01",
+        "name": "Polisvoorwaarden caravan"
+      }
+    ],
+    "controlData": {
+      "applicationGoal": "policy",
+      "mutationType": "RENEWAL",
+      "scheduledFinancialTransaction": [
+        {
+          "indexFinancialTransaction": 0,
+          "totalAmount": 49.05,
+          "status": "scheduled",
+          "code": "PREM",
+          "startDateTime": "2026-04-01",
+          "endDateTime": "2026-05-01"
+        }
+      ],
+      "premiumCalculationValid": true
+    }
+  }
+}

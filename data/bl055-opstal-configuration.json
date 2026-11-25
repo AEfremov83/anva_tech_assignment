@@ -1,0 +1,101 @@
+{
+  "allowBack": false,
+  "configurationType": "entity",
+  "hideInMenu": false,
+  "key": "bl055",
+  "name": "055 - Opstal",
+  "type": "Bl055",
+  "schema": {
+    "title": "Opstal",
+    "type": "object",
+    "properties": {
+      "id": {
+        "format": "uuid",
+        "title": "Identificatienummer",
+        "type": "string"
+      },
+      "description": {
+        "title": "Omschrijving",
+        "type": "string"
+      },
+      "insuredObject": {
+        "title": "Verzekerd object",
+        "type": "object",
+        "properties": {
+          "address": {
+            "title": "Adres",
+            "type": "object",
+            "properties": {
+              "street": { "title": "Straatnaam", "type": "string", "maxLength": 35 },
+              "houseNumber": { "title": "Huisnummer", "type": "integer" },
+              "houseLetter": { "title": "Huisletter", "type": "string", "maxLength": 1 },
+              "postalCode": { "title": "Postcode", "type": "string", "maxLength": 9 },
+              "city": { "title": "Plaatsnaam", "type": "string", "maxLength": 24 },
+              "country": { "$ref": "jet://schema/CountryLookup" }
+            }
+          },
+          "constructionYear": { "title": "Bouwjaar", "type": "integer" },
+          "buildingType": {
+            "title": "Gebouwtype",
+            "type": "string",
+            "oneOf": [
+              { "const": "RESIDENTIAL", "description": "Woonhuis" },
+              { "const": "COMMERCIAL", "description": "Bedrijfspand" }
+            ]
+          },
+          "roofType": {
+            "title": "Dakbedekking",
+            "type": "string",
+            "oneOf": [
+              { "const": "HARD_COVER", "description": "Harde dakbedekking" },
+              { "const": "SOFT_COVER", "description": "Zachte dakbedekking" }
+            ]
+          },
+          "surfaceArea": { "title": "Oppervlakte (m²)", "type": "number" }
+        }
+      },
+      "coverage": {
+        "title": "Dekking",
+        "type": "object",
+        "properties": {
+          "insuredAmount": { "title": "Verzekerd bedrag (€)", "type": "number" },
+          "deductible": { "title": "Eigen risico (€)", "type": "number" },
+          "coverageType": {
+            "title": "Dekkingstype",
+            "type": "string",
+            "oneOf": [
+              { "const": "BASIC", "description": "Basis" },
+              { "const": "EXTENDED", "description": "Uitgebreid" },
+              { "const": "ALL_RISK", "description": "All-risk" }
+            ]
+          }
+        }
+      },
+      "premium": {
+        "title": "Premie",
+        "type": "object",
+        "properties": {
+          "netAnnualPremium": { "title": "Netto jaarpremie (€)", "type": "number" },
+          "insuranceTaxPercentage": { "title": "Assurantiebelasting (%)", "type": "number", "readOnly": true },
+          "taxAmount": { "title": "Belasting bedrag (€)", "type": "number", "readOnly": true },
+          "totalInstallmentAmount": { "title": "Totaal termijnbedrag (€)", "type": "number", "readOnly": true }
+        }
+      },
+      "contract": { "$ref": "jet://entity/contracts#/properties/id" },
+      "startDate": { "title": "Ingangsdatum", "type": "string", "format": "date" },
+      "endDate": { "title": "Einddatum", "type": "string", "format": "date" },
+      "status": {
+        "title": "Status",
+        "type": "string",
+        "oneOf": [
+          { "const": "ACTIVE", "description": "Actief" },
+          { "const": "TERMINATED", "description": "Beëindigd" }
+        ]
+      }
+    }
+  },
+  "states": [
+    { "name": "draft", "title": "Draft Entity", "actions": [{ "name": "fillEntity", "title": "Fill Entity" }], "routes": [] },
+    { "name": "final", "title": "Final Entity", "actions": [], "routes": [] }
+  ]
+}

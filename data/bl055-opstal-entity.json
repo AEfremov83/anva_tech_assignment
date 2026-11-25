@@ -1,0 +1,48 @@
+{
+  "allowBack": false,
+  "configKey": "bl055",
+  "configTitle": "055 - Opstal",
+  "createdAt": "2026-03-15T10:22:41.000000Z",
+  "currentState": "final",
+  "currentStateTitle": "Final Entity",
+  "entityId": "d71d016b-6eee-4ceb-8b4e-399c6988407b",
+  "isDraft": false,
+  "isValidNow": true,
+  "validFrom": "2026-03-15T10:22:41.000000Z",
+  "validTo": null,
+  "versionId": "ee11ff22-3344-5566-7788-99aabbccddee",
+  "versionTag": 0,
+  "data": {
+    "id": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+    "description": "Opstalverzekering woonhuis",
+    "insuredObject": {
+      "address": {
+        "street": "Keizersgracht",
+        "houseNumber": 42,
+        "houseLetter": "A",
+        "postalCode": "1015CS",
+        "city": "Amsterdam",
+        "country": "NL"
+      },
+      "constructionYear": 1923,
+      "buildingType": "RESIDENTIAL",
+      "roofType": "HARD_COVER",
+      "surfaceArea": 120
+    },
+    "coverage": {
+      "insuredAmount": 350000,
+      "deductible": 250,
+      "coverageType": "EXTENDED"
+    },
+    "premium": {
+      "netAnnualPremium": 485.5,
+      "insuranceTaxPercentage": 21,
+      "taxAmount": 101.96,
+      "totalInstallmentAmount": 587.46
+    },
+    "contract": "f9e8d7c6-b5a4-3210-fedc-ba0987654321",
+    "startDate": "2026-01-01",
+    "endDate": "2027-01-01",
+    "status": "ACTIVE"
+  }
+}

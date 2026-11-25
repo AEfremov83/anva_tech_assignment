@@ -1,0 +1,798 @@
+{
+  "allowBack": false,
+  "configurationType": "entity",
+  "hideInMenu": false,
+  "key": "hullCaravanIntermediary",
+  "name": "022 - Casco caravan (intermediair)",
+  "type": "HullCaravanIntermediary",
+  "schema": {
+    "type": "object",
+    "title": "Schadeverzekeringscontract",
+    "properties": {
+      "id": {
+        "type": "string",
+        "format": "uuid",
+        "title": "Identificatienummer"
+      },
+      "contractNumber": {
+        "type": "string",
+        "readOnly": true,
+        "title": "Contractnummer"
+      },
+      "oldContractNumber": {
+        "type": "string",
+        "title": "Contractnummer oud"
+      },
+      "startDate": {
+        "type": "string",
+        "format": "date",
+        "title": "Begindatum"
+      },
+      "endDate": {
+        "type": "string",
+        "format": "date",
+        "title": "Einddatum"
+      },
+      "statusType": {
+        "$ref": "jet://schema/ContractStatusTypeLookup",
+        "type": "string"
+      },
+      "sequenceNumber": {
+        "type": "integer",
+        "title": "Volgnummer"
+      },
+      "netAnnualPremium": {
+        "type": "number",
+        "title": "Netto jaarpremie"
+      },
+      "grossPremiumInstallment": {
+        "type": "number",
+        "title": "Bruto premie (€)"
+      },
+      "netPremiumInstallment": {
+        "type": "number",
+        "title": "Netto premietermijnbedrag (€)"
+      },
+      "totalInstallmentAmount": {
+        "type": "number",
+        "title": "Termijnbedrag totaal (€)"
+      },
+      "insuranceTaxInstallmentAmount": {
+        "type": "number",
+        "title": "Termijnbedrag assurantiebelasting (€)"
+      },
+      "paymentTermInMonths": {
+        "$ref": "jet://schema/PaymentTermInMonthsLookup",
+        "type": "string"
+      },
+      "premiumCollector": {
+        "$ref": "jet://schema/PremiumCollectorLookup",
+        "type": "string"
+      },
+      "collectionMethod": {
+        "$ref": "jet://schema/CollectionMethodLookup",
+        "type": "string"
+      },
+      "policyPartOfPackage": {
+        "type": "boolean",
+        "title": "Polis onderdeel van een pakket"
+      },
+      "standardCommission": {
+        "type": "boolean",
+        "title": "Standaard provisie"
+      },
+      "renewalCommissionPercentage": {
+        "type": "number",
+        "title": "Percentage prolongatieprovisie (%)"
+      },
+      "indexLinked": {
+        "$ref": "jet://schema/LogicalLookup",
+        "type": "string"
+      },
+      "privateOrCommercialProduct": {
+        "$ref": "jet://schema/PrivateOrCommercialProductLookup",
+        "type": "string"
+      },
+      "productInformation": {
+        "type": "object",
+        "title": "Productinformatie",
+        "properties": {
+          "productCode": {
+            "type": "string",
+            "title": "Productcode maatschappij"
+          },
+          "productName": {
+            "type": "string",
+            "title": "Productnaam"
+          },
+          "productDescription": {
+            "type": "string",
+            "title": "Produktomschrijving maatschappij"
+          },
+          "businessLine": {
+            "$ref": "jet://schema/BusinessLineLookup",
+            "type": "string",
+            "const": "022",
+            "title": "Branchecode"
+          },
+          "porCompany": {
+            "$ref": "jet://schema/PorCompanyLookup",
+            "type": "string"
+          }
+        }
+      },
+      "contractPeriod": {
+        "type": "object",
+        "title": "Contractperiode",
+        "properties": {
+          "effectiveDate": {
+            "type": "string",
+            "format": "date",
+            "title": "Ingangsdatum"
+          },
+          "expiryDate": {
+            "type": "string",
+            "format": "date",
+            "title": "Einddatum"
+          },
+          "contractDurationInMonths": {
+            "type": "integer",
+            "title": "Contractduur in maanden"
+          },
+          "noticePeriodInDays": {
+            "type": "integer",
+            "title": "Opzegtermijn in dagen"
+          }
+        }
+      },
+      "contractAmounts": {
+        "type": "object",
+        "title": "Contractbedragen",
+        "properties": {
+          "contractInstallmentAmounts": {
+            "type": "object",
+            "title": "Contract termijnbedragen",
+            "properties": {
+              "contractCosts": {
+                "type": "object",
+                "title": "Contractkosten",
+                "properties": {
+                  "netPolicyCosts": {
+                    "type": "number",
+                    "title": "Eenmalige kosten netto (€)"
+                  },
+                  "policyCostsTaxAmount": {
+                    "type": "number",
+                    "title": "Eenmalige kosten belastingbedrag (€)"
+                  },
+                  "invoicePolicyCosts": {
+                    "type": "number",
+                    "title": "Eenmalige kosten factuurbedrag (€)"
+                  }
+                }
+              },
+              "cumulativePremiumAmounts": {
+                "type": "object",
+                "title": "Bedragen",
+                "properties": {
+                  "taxAmount": {
+                    "type": "number",
+                    "readOnly": true,
+                    "title": "Belasting bedrag (€)"
+                  },
+                  "grossPremiumInstallment": {
+                    "type": "number",
+                    "title": "Termijnbedrag bruto premie"
+                  },
+                  "netAnnualPremium": {
+                    "type": "number",
+                    "title": "Netto jaarpremie"
+                  }
+                }
+              }
+            }
+          },
+          "contractPeriodAmounts": {
+            "type": "object",
+            "title": "Contract looptijdbedragen",
+            "properties": {
+              "contractCosts": {
+                "type": "object",
+                "title": "Contractkosten",
+                "properties": {
+                  "netPolicyCosts": {
+                    "type": "number",
+                    "title": "Eenmalige kosten netto (€)"
+                  },
+                  "policyCostsTaxAmount": {
+                    "type": "number",
+                    "title": "Eenmalige kosten belastingbedrag (€)"
+                  },
+                  "invoicePolicyCosts": {
+                    "type": "number",
+                    "title": "Eenmalige kosten factuurbedrag (€)"
+                  }
+                }
+              },
+              "cumulativePremiumAmounts": {
+                "type": "object",
+                "title": "Bedragen",
+                "properties": {
+                  "taxAmount": {
+                    "type": "number",
+                    "readOnly": true,
+                    "title": "Belasting bedrag (€)"
+                  },
+                  "grossPremiumInstallment": {
+                    "type": "number",
+                    "title": "Termijnbedrag bruto premie"
+                  },
+                  "netAnnualPremium": {
+                    "type": "number",
+                    "title": "Netto jaarpremie"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "parties": {
+        "type": "array",
+        "title": "Partijen",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "title": "Verzekeringnemer",
+              "properties": {
+                "sequenceNumber": {
+                  "type": "integer",
+                  "title": "Volgnummer"
+                },
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Verzekeringnemer",
+                  "const": "policyHolder"
+                },
+                "partyType": {
+                  "type": "string",
+                  "title": "Entiteittype",
+                  "oneOf": [
+                    {
+                      "const": "PERSON"
+                    },
+                    {
+                      "const": "ORGANIZATION"
+                    }
+                  ]
+                },
+                "person": {
+                  "$ref": "jet://entity/persons#/properties/id",
+                  "type": "string"
+                },
+                "organization": {
+                  "$ref": "jet://entity/organizations#/properties/id",
+                  "type": "string"
+                },
+                "privateOrCommercial": {
+                  "$ref": "jet://schema/PrivateOrCommercialLookup",
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "title": "Tussenpersoon",
+              "properties": {
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Tussenpersoon",
+                  "const": "intermediary"
+                },
+                "partyType": {
+                  "type": "string",
+                  "title": "Entiteittype",
+                  "oneOf": [
+                    {
+                      "const": "PERSON"
+                    },
+                    {
+                      "const": "ORGANIZATION"
+                    }
+                  ],
+                  "const": "ORGANIZATION"
+                },
+                "organization": {
+                  "$ref": "jet://entity/organizations#/properties/id",
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "subjects": {
+        "type": "array",
+        "title": "Objecten",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "title": "Caravan",
+              "properties": {
+                "sequenceNumber": {
+                  "type": "integer",
+                  "title": "Volgnummer"
+                },
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Caravan",
+                  "const": "caravan"
+                },
+                "licensePlate": {
+                  "type": "string",
+                  "title": "Kenteken"
+                },
+                "chassisNumber": {
+                  "type": "string",
+                  "title": "Chassisnummer"
+                },
+                "make": {
+                  "type": "string",
+                  "title": "Merk"
+                },
+                "model": {
+                  "type": "string",
+                  "title": "Model"
+                },
+                "constructionYear": {
+                  "type": "integer",
+                  "title": "Bouwjaar"
+                },
+                "purchaseDate": {
+                  "type": "string",
+                  "format": "date",
+                  "title": "Aankoopdatum"
+                },
+                "purchaseAmount": {
+                  "type": "number",
+                  "title": "Bedrag aankoop (€)"
+                },
+                "vatIncluded": {
+                  "$ref": "jet://schema/VatIncludedLookup",
+                  "type": "string"
+                },
+                "objectUse": {
+                  "type": "string",
+                  "title": "Gebruik, toelichting"
+                },
+                "objectRentedOut": {
+                  "type": "boolean",
+                  "title": "Verhuur"
+                },
+                "appraisalValue": {
+                  "type": "number",
+                  "title": "Bedrag taxatiewaarde"
+                },
+                "valueExtraAccessories": {
+                  "type": "number",
+                  "title": "Bedrag waarde extra accessoires"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "articles": {
+        "type": "array",
+        "title": "Dekkingen",
+        "items": {
+          "anyOf": [
+            {
+              "type": "object",
+              "title": "Casco",
+              "properties": {
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Casco",
+                  "const": "hull"
+                },
+                "coverageCode": {
+                  "type": "string",
+                  "title": "ADN Dekkingscode",
+                  "const": "2002",
+                  "readOnly": true
+                },
+                "netInvoiceAmount": {
+                  "type": "number",
+                  "title": "Netto factuurbedrag (€)"
+                },
+                "discount": {
+                  "type": "number",
+                  "title": "Korting (€)"
+                },
+                "taxCode": {
+                  "type": "number",
+                  "title": "Belastingpercentage",
+                  "oneOf": [
+                    {
+                      "const": 0.0
+                    },
+                    {
+                      "const": 0.21
+                    }
+                  ]
+                },
+                "taxAmount": {
+                  "type": "number",
+                  "title": "Belastingbedrag (€)"
+                },
+                "coveragePremiumCalculation": {
+                  "type": "object",
+                  "title": "Premieopbouw",
+                  "properties": {
+                    "effectiveStartDate": {
+                      "type": "string",
+                      "format": "date",
+                      "title": "Ingangsdatum dekking"
+                    },
+                    "adjustmentFactor": {
+                      "type": "number",
+                      "title": "Aanpassingsfactor"
+                    },
+                    "collectivityFactor": {
+                      "type": "number",
+                      "title": "Perc. collectiviteitfactor"
+                    }
+                  }
+                },
+                "intermediaryCommission": {
+                  "type": "object",
+                  "title": "Provisieberekening intermediairprovisie",
+                  "properties": {
+                    "intermediaryCommissionPercentage": {
+                      "type": "number",
+                      "title": "Intermediair provisie (%)"
+                    },
+                    "intermediaryCommissionBase": {
+                      "type": "string",
+                      "title": "Basis",
+                      "oneOf": [
+                        {
+                          "const": "GROSS_PREMIUM"
+                        },
+                        {
+                          "const": "NET_PREMIUM"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "sumInsured": {
+                  "type": "number",
+                  "title": "Verzekerde som"
+                },
+                "deductibleAmount": {
+                  "type": "number",
+                  "title": "Eigen risico (€)"
+                },
+                "numberOfMonthsPurchaseValueGuarantee": {
+                  "type": "integer",
+                  "title": "Aantal maanden aankoopgarantie"
+                },
+                "clauses": {
+                  "type": "array",
+                  "title": "Clausules",
+                  "items": {
+                    "type": "object",
+                    "title": "Clausule",
+                    "properties": {
+                      "sequenceNumber": {
+                        "type": "integer",
+                        "title": "Volgnummer"
+                      },
+                      "number": {
+                        "type": "string",
+                        "title": "Nummer"
+                      },
+                      "version": {
+                        "type": "string",
+                        "title": "Versie"
+                      },
+                      "textShort": {
+                        "type": "string",
+                        "title": "Clausuletekst"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "title": "Pechhulp",
+              "properties": {
+                "sequenceNumber": {
+                  "type": "integer",
+                  "title": "Volgnummer"
+                },
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Pechhulp",
+                  "const": "breakdownAssistance"
+                },
+                "coverageCode": {
+                  "type": "string",
+                  "title": "ADN Dekkingscode",
+                  "const": "2049",
+                  "readOnly": true
+                },
+                "netInvoiceAmount": {
+                  "type": "number",
+                  "title": "Netto factuurbedrag (€)"
+                },
+                "taxCode": {
+                  "type": "number",
+                  "title": "Belastingpercentage",
+                  "oneOf": [
+                    {
+                      "const": 0.0
+                    },
+                    {
+                      "const": 0.21
+                    }
+                  ]
+                },
+                "taxAmount": {
+                  "type": "number",
+                  "title": "Belastingbedrag (€)"
+                },
+                "typeOfCalculationAtRenewal": {
+                  "$ref": "jet://schema/TypeOfCalculationAtRenewalLookup",
+                  "type": "string"
+                }
+              }
+            },
+            {
+              "type": "object",
+              "title": "Aankoopwaarde garantie",
+              "properties": {
+                "_discriminator": {
+                  "type": "string",
+                  "title": "Aankoopwaarde garantie",
+                  "const": "purchaseValueGuarantee"
+                },
+                "coverageCode": {
+                  "type": "string",
+                  "title": "ADN Dekkingscode",
+                  "const": "2041",
+                  "readOnly": true
+                },
+                "netInvoiceAmount": {
+                  "type": "number",
+                  "title": "Netto factuurbedrag (€)"
+                },
+                "taxCode": {
+                  "type": "number",
+                  "title": "Belastingpercentage",
+                  "oneOf": [
+                    {
+                      "const": 0.0
+                    },
+                    {
+                      "const": 0.21
+                    }
+                  ]
+                },
+                "taxAmount": {
+                  "type": "number",
+                  "title": "Belastingbedrag (€)"
+                },
+                "replacementValueTermInYears": {
+                  "type": "number",
+                  "title": "Nieuwwaardetermijn in jaren"
+                },
+                "intermediaryCommission": {
+                  "type": "object",
+                  "title": "Provisieberekening intermediairprovisie",
+                  "properties": {
+                    "intermediaryCommissionPercentage": {
+                      "type": "number",
+                      "title": "Intermediair provisie (%)"
+                    },
+                    "intermediaryCommissionBase": {
+                      "type": "string",
+                      "title": "Basis",
+                      "oneOf": [
+                        {
+                          "const": "GROSS_PREMIUM"
+                        },
+                        {
+                          "const": "NET_PREMIUM"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "clauses": {
+        "type": "array",
+        "title": "Clausules",
+        "items": {
+          "type": "object",
+          "title": "Clausule",
+          "properties": {
+            "sequenceNumber": {
+              "type": "integer",
+              "title": "Volgnummer"
+            },
+            "number": {
+              "type": "string",
+              "title": "Nummer"
+            },
+            "version": {
+              "type": "string",
+              "title": "Versie"
+            },
+            "textShort": {
+              "type": "string",
+              "title": "Clausuletekst"
+            },
+            "name": {
+              "type": "string",
+              "title": "Clausulenaam"
+            },
+            "textFull": {
+              "type": "string",
+              "title": "Clausule tekst"
+            },
+            "description": {
+              "type": "string",
+              "title": "Omschrijving"
+            }
+          }
+        }
+      },
+      "termsAndConditions": {
+        "type": "array",
+        "title": "Polisvoorwaarden",
+        "items": {
+          "type": "object",
+          "title": "Voorwaarde",
+          "properties": {
+            "sequenceNumber": {
+              "type": "integer",
+              "title": "Volgnummer"
+            },
+            "number": {
+              "type": "string",
+              "title": "Nummer"
+            },
+            "version": {
+              "type": "string",
+              "title": "Versie"
+            },
+            "name": {
+              "type": "string",
+              "title": "Voorwaarde naam"
+            }
+          }
+        }
+      },
+      "controlData": {
+        "type": "object",
+        "title": "Control Data",
+        "properties": {
+          "applicationGoal": {
+            "type": "string",
+            "title": "Doel van de aanvraag",
+            "oneOf": [
+              {
+                "const": "quote",
+                "description": "Offerte"
+              },
+              {
+                "const": "policy",
+                "description": "Polis"
+              }
+            ]
+          },
+          "mutationType": {
+            "type": "string",
+            "title": "Mutatiesoort",
+            "oneOf": [
+              {
+                "const": "NEW_CONTRACT",
+                "description": "Nieuw contract"
+              },
+              {
+                "const": "CHANGE_COVERAGE",
+                "description": "Dekking aanpassen"
+              },
+              {
+                "const": "RENEWAL",
+                "description": "Prolongatie"
+              },
+              {
+                "const": "TERMINATE",
+                "description": "Royeren"
+              }
+            ]
+          },
+          "scheduledFinancialTransaction": {
+            "type": "array",
+            "title": "Nieuwe financiele transacties deze versie",
+            "items": {
+              "type": "object",
+              "properties": {
+                "indexFinancialTransaction": {
+                  "type": "integer",
+                  "title": "Index in financialTransactions"
+                },
+                "totalAmount": {
+                  "type": "number",
+                  "title": "Totaalbedrag"
+                },
+                "status": {
+                  "type": "string",
+                  "title": "Status"
+                },
+                "code": {
+                  "type": "string",
+                  "title": "Code"
+                },
+                "startDateTime": {
+                  "type": "string",
+                  "format": "date",
+                  "title": "Begindatum"
+                },
+                "endDateTime": {
+                  "type": "string",
+                  "format": "date",
+                  "title": "Einddatum"
+                }
+              }
+            }
+          },
+          "premiumCalculationValid": {
+            "type": "boolean",
+            "title": "Premieberekening geldig"
+          }
+        }
+      }
+    }
+  },
+  "states": [
+    {
+      "name": "draft",
+      "title": "Draft Entity",
+      "actions": [
+        {
+          "name": "fillEntity",
+          "title": "Fill Entity"
+        }
+      ],
+      "routes": []
+    },
+    {
+      "name": "final",
+      "title": "Final Entity",
+      "actions": [
+        {
+          "name": "changeContract",
+          "title": "Change contract"
+        },
+        {
+          "name": "terminateContract",
+          "title": "Terminate contract"
+        }
+      ],
+      "routes": []
+    }
+  ]
+}

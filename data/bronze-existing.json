@@ -1,0 +1,364 @@
+[
+  {
+    "LOADED_AT": "2026-09-01T02:00:04Z",
+    "ENTITY_TYPE": "persons",
+    "ENTITY_KEY": "ent-001",
+    "VERSION_ID": "v-001-a",
+    "PAYLOAD": {
+      "configKey": "persons",
+      "entityId": "ent-001",
+      "versionId": "v-001-a",
+      "createdAt": "2025-11-15T10:30:00Z",
+      "validFrom": "2025-11-15T00:00:00Z",
+      "validTo": null,
+      "currentState": "final",
+      "data": {
+        "firstName": "Jan",
+        "lastName": "de Vries",
+        "dateOfBirth": "1985-03-22",
+        "isActive": true,
+        "age": 40,
+        "addresses": [
+          {
+            "street": "Keizersgracht",
+            "houseNumber": 123,
+            "city": "Amsterdam",
+            "postalCode": "1015AA",
+            "country": "NL"
+          },
+          {
+            "street": "Rue de Rivoli",
+            "houseNumber": 45,
+            "city": "Paris",
+            "postalCode": "75001",
+            "country": "FR"
+          }
+        ],
+        "contactInfo": {
+          "email": "jan@example.com",
+          "phoneNumber": "+31612345678",
+          "preferences": {
+            "newsletter": true,
+            "language": "NL"
+          }
+        },
+        "employer": "v-042-a",
+        "profiles": [
+          {
+            "_discriminator": "customerProfile",
+            "customerNumber": "C-1001",
+            "segment": "retail"
+          }
+        ],
+        "bankAccounts": [
+          {
+            "iban": "NL00TEST0123456789",
+            "bic": "TESTNLXX",
+            "accountHolderName": "J. de Vries"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "LOADED_AT": "2026-09-01T02:00:09Z",
+    "ENTITY_TYPE": "persons",
+    "ENTITY_KEY": "ent-002",
+    "VERSION_ID": "v-002-a",
+    "PAYLOAD": {
+      "configKey": "persons",
+      "entityId": "ent-002",
+      "versionId": "v-002-a",
+      "createdAt": "2025-12-01T14:00:00Z",
+      "validFrom": "2025-12-01T00:00:00Z",
+      "validTo": null,
+      "currentState": "final",
+      "data": {
+        "firstName": "Maria",
+        "lastName": "Bakker",
+        "dateOfBirth": "1990-07-14",
+        "isActive": true,
+        "age": 35,
+        "addresses": [
+          {
+            "street": "Oudegracht",
+            "houseNumber": 88,
+            "city": "Utrecht",
+            "postalCode": "3511AB",
+            "country": "NL"
+          }
+        ],
+        "contactInfo": {
+          "email": "maria@example.com",
+          "phoneNumber": "+31698765432",
+          "preferences": {
+            "newsletter": false,
+            "language": "EN"
+          }
+        },
+        "employer": null
+      }
+    }
+  },
+  {
+    "LOADED_AT": "2026-09-01T02:00:15Z",
+    "ENTITY_TYPE": "persons",
+    "ENTITY_KEY": "ent-003",
+    "VERSION_ID": "v-003-a",
+    "PAYLOAD": {
+      "configKey": "persons",
+      "entityId": "ent-003",
+      "versionId": "v-003-a",
+      "createdAt": "2026-01-20T09:00:00Z",
+      "validFrom": "2026-01-20T00:00:00Z",
+      "validTo": null,
+      "currentState": "final",
+      "data": {
+        "firstName": "Pieter",
+        "lastName": "Smit",
+        "dateOfBirth": "1978-11-02",
+        "isActive": true,
+        "age": 47,
+        "addresses": [
+          {
+            "street": "Grote Markt",
+            "houseNumber": 1,
+            "city": "Groningen",
+            "postalCode": "9712HN",
+            "country": "NL"
+          }
+        ],
+        "contactInfo": {
+          "email": "pieter@example.com",
+          "phoneNumber": "+31611112222",
+          "preferences": {
+            "newsletter": true,
+            "language": "NL"
+          }
+        },
+        "employer": null
+      }
+    }
+  },
+  {
+    "LOADED_AT": "2026-09-01T02:01:02Z",
+    "ENTITY_TYPE": "organizations",
+    "ENTITY_KEY": "org-042",
+    "VERSION_ID": "v-042-a",
+    "PAYLOAD": {
+      "configKey": "organizations",
+      "entityId": "org-042",
+      "versionId": "v-042-a",
+      "createdAt": "2025-10-01T09:00:00Z",
+      "validFrom": "2025-10-01T00:00:00Z",
+      "validTo": null,
+      "currentState": "final",
+      "data": {
+        "name": "Acme Insurance B.V.",
+        "chamberOfCommerceNumber": "12345678",
+        "foundedDate": "2001-06-15",
+        "revenue": 5200000.5,
+        "addresses": [
+          {
+            "street": "Zuidas",
+            "houseNumber": 500,
+            "city": "Amsterdam",
+            "postalCode": "1082MD",
+            "type": "OFFICE"
+          }
+        ],
+        "sector": "INSURANCE",
+        "tradeNames": [
+          "Acme",
+          "Acme Verzekeringen"
+        ]
+      }
+    }
+  },
+  {
+    "LOADED_AT": "2026-09-01T02:01:07Z",
+    "ENTITY_TYPE": "organizations",
+    "ENTITY_KEY": "org-043",
+    "VERSION_ID": "v-043-a",
+    "PAYLOAD": {
+      "configKey": "organizations",
+      "entityId": "org-043",
+      "versionId": "v-043-a",
+      "createdAt": "2025-10-05T09:00:00Z",
+      "validFrom": "2025-10-05T00:00:00Z",
+      "validTo": null,
+      "currentState": "final",
+      "data": {
+        "name": "Hanze Brokers B.V.",
+        "chamberOfCommerceNumber": "87654321",
+        "foundedDate": "1998-02-01",
+        "revenue": 1200000.0,
+        "addresses": [
+          {
+            "street": "Grote Markt",
+            "houseNumber": 20,
+            "city": "Groningen",
+            "postalCode": "9712HR",
+            "type": "OFFICE"
+          }
+        ],
+        "sector": "INTERMEDIARY"
+      }
+    }
+  },
+  {
+    "LOADED_AT": "2026-09-01T02:02:31Z",
+    "ENTITY_TYPE": "hullCaravanIntermediary",
+    "ENTITY_KEY": "ctr-101",
+    "VERSION_ID": "v-101-a",
+    "PAYLOAD": {
+      "allowBack": false,
+      "configKey": "hullCaravanIntermediary",
+      "configTitle": "022 - Casco caravan (intermediair)",
+      "createdAt": "2026-01-10T11:00:00Z",
+      "currentState": "final",
+      "currentStateTitle": "Final Entity",
+      "entityId": "ctr-101",
+      "isDraft": false,
+      "isValidNow": true,
+      "validFrom": "2026-01-01T00:00:00Z",
+      "validTo": "2027-01-01T00:00:00Z",
+      "versionId": "v-101-a",
+      "versionTag": 1,
+      "data": {
+        "id": "ctr-101",
+        "contractNumber": "CAR-2026-000101",
+        "oldContractNumber": "CAR-2022-000418",
+        "startDate": "2026-01-01",
+        "endDate": "2027-01-01",
+        "statusType": "inForce",
+        "sequenceNumber": 2,
+        "netAnnualPremium": 412.6,
+        "grossPremiumInstallment": 41.85,
+        "netPremiumInstallment": 34.38,
+        "totalInstallmentAmount": 41.85,
+        "insuranceTaxInstallmentAmount": 7.47,
+        "paymentTermInMonths": "1",
+        "premiumCollector": "intermediary",
+        "collectionMethod": "directDebit",
+        "policyPartOfPackage": false,
+        "standardCommission": true,
+        "renewalCommissionPercentage": 15.0,
+        "indexLinked": "Y",
+        "privateOrCommercialProduct": "private",
+        "productInformation": {
+          "productCode": "CAR-HULL-INT",
+          "productName": "Casco caravan (intermediair)",
+          "productDescription": "Cascoverzekering voor caravans, gesloten via een tussenpersoon",
+          "businessLine": "022",
+          "porCompany": "M027"
+        },
+        "parties": [
+          {
+            "sequenceNumber": 1,
+            "_discriminator": "policyHolder",
+            "partyType": "PERSON",
+            "person": "v-001-a",
+            "privateOrCommercial": "private"
+          },
+          {
+            "_discriminator": "intermediary",
+            "partyType": "ORGANIZATION",
+            "organization": "v-043-b"
+          }
+        ],
+        "subjects": [
+          {
+            "sequenceNumber": 1,
+            "_discriminator": "caravan",
+            "licensePlate": "XX-101-A",
+            "chassisNumber": "WCV00000000010101",
+            "make": "Example Caravans",
+            "model": "Tourer 450",
+            "constructionYear": 2018,
+            "purchaseDate": "2020-05-02",
+            "purchaseAmount": 17500.0,
+            "vatIncluded": "Y",
+            "objectUse": "private",
+            "objectRentedOut": false,
+            "appraisalValue": 15800.0,
+            "valueExtraAccessories": 900.0
+          }
+        ],
+        "articles": [
+          {
+            "_discriminator": "hull",
+            "coverageCode": "2002",
+            "netInvoiceAmount": 312.4,
+            "discount": 0.0,
+            "taxCode": 0.21,
+            "taxAmount": 65.6,
+            "coveragePremiumCalculation": {
+              "effectiveStartDate": "2026-01-01",
+              "adjustmentFactor": 1.0,
+              "collectivityFactor": 1.0
+            },
+            "intermediaryCommission": {
+              "intermediaryCommissionPercentage": 15.0,
+              "intermediaryCommissionBase": "NET_PREMIUM"
+            },
+            "sumInsured": 16700.0,
+            "deductibleAmount": 150.0,
+            "numberOfMonthsPurchaseValueGuarantee": 36,
+            "clauses": [
+              {
+                "sequenceNumber": 1,
+                "number": "CL-CAR-07",
+                "version": "2024-01",
+                "textShort": "Winterstalling verplicht op een afgesloten terrein"
+              }
+            ]
+          },
+          {
+            "sequenceNumber": 2,
+            "_discriminator": "breakdownAssistance",
+            "coverageCode": "2049",
+            "netInvoiceAmount": 48.0,
+            "taxCode": 0.21,
+            "taxAmount": 10.08,
+            "typeOfCalculationAtRenewal": "INDEXED"
+          }
+        ],
+        "clauses": [
+          {
+            "sequenceNumber": 1,
+            "number": "CL-ALG-01",
+            "version": "2023-07",
+            "textShort": "Algemene clausule caravanverzekering",
+            "name": "Algemeen",
+            "textFull": "Op deze verzekering zijn de algemene voorwaarden van toepassing.",
+            "description": "Standaardclausule op elk caravancontract"
+          }
+        ],
+        "termsAndConditions": [
+          {
+            "sequenceNumber": 1,
+            "number": "PVW-CAR-2025-01",
+            "version": "2025-01",
+            "name": "Polisvoorwaarden caravan"
+          }
+        ],
+        "controlData": {
+          "applicationGoal": "policy",
+          "mutationType": "RENEWAL",
+          "scheduledFinancialTransaction": [
+            {
+              "indexFinancialTransaction": 0,
+              "totalAmount": 41.85,
+              "status": "scheduled",
+              "code": "PREM",
+              "startDateTime": "2026-10-01",
+              "endDateTime": "2026-11-01"
+            }
+          ],
+          "premiumCalculationValid": true
+        }
+      }
+    }
+  }
+]
