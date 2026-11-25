@@ -127,7 +127,7 @@ Fill in the Part 1 section before you open Part 2, and leave it as it is afterwa
 
 ## Part 1 overall
 
-**Time spent on Part 1:** ___ min
+**Time spent on Part 1:** 120 min
 **Assumptions I made:**
 - `VERSION_ID` is unique across entity types.
 - A version's `data` does not change on re-load; only `validTo` does.
@@ -145,24 +145,67 @@ Fill in the Part 1 section before you open Part 2, and leave it as it is afterwa
 ## Part A — Bronze loader
 
 **Bug ranking by production impact** (most severe first, with the concrete symptom in BRONZE or in the logs):
-1.
-2.
-3.
-4.
-5.
-6.
+1. **`fetch_pages` breaks after the first page.**
+   - BRONZE: only the first page (100 versions) per entity type ever lands, on every run. In the fixtures, persons p2/p3 (`v-004-a` … `v-008-a`), organizations p2 and contracts p2 (`v-104-a`, `v-105-a`) are missing.
+   - Logs: no error, only `pages: 1` for every type. Re-runs never repair it.
+2. **Dedup on `entityId` instead of `versionId`.**
+   - BRONZE: a new version that has the same `validTo` as an already loaded version of the same entity (usually NULL, i.e. the new current version) is skipped. `v-002-b` and `v-043-b` are missing, so after the re-append of the closed `v-002-a`, `ent-002` has no current version at all, and contracts that reference `v-002-b` dangle.
+   - Logs: the skip counts as normal dedup. Re-runs never repair it.
+3. **`ENTITY_TYPE` lags one type behind.**
+   - BRONZE: organizations are stored as `persons`, contracts as `organizations` (buggy run: persons 7, organizations 5, hull 1). SILVER per-type views pick up the wrong entities, and the next run re-appends them because dedup is per type.
+   - The payload is intact, so the data is recoverable, but only through a correction view, since BRONZE is append-only. Detectable with `ENTITY_TYPE <> PAYLOAD:configKey`.
+4. **Client secret logged and hard-coded.**
+   - Logs: the token with the secret is in the first INFO line of every run, and the secret is in git.
+   - No data damage, but anyone with log or repo access can read the tenant's API. The secret has to be rotated. I rank data bugs higher; in a security review this would be first.
+5. **Mutable default `cache=set()` in `known_keys`.**
+   - BRONZE: types 2 onwards are deduped against the persons' keys, so every run re-appends their already loaded versions (`v-042-a`, `v-101-a`). Duplicates grow every night.
+   - SILVER's latest-load dedup hides them, but storage grows and the duplicate-version DQ check is noisy.
+6. **Retry catches `PermanentError` instead of `TransientError`.**
+   - A 503 abandons the whole type for the night: `v-044-a` and `v-045-a` are missing until a later run succeeds. Logs: `ERROR … giving up … 503`.
+   - A 422 is retried 3 times, with 3 misleading "retrying" warnings and extra API calls, instead of one error.
+   - It repairs itself on the next good run, hence the lower rank.
+7. **Only `TransientError`/`PermanentError` caught per type.**
+   - Latent: any other exception (e.g. a wrapper without `versionId` → `KeyError`) stops the run and all remaining types. That breaks the rule "one failing type must not stop the others". It does not occur in the fixtures.
 
 **What I did**
--
+- Read the loader rules in the docstring, ran the script unchanged, and compared every function with the rules.
+- Fixed 7 issues, each marked `# FIX:`:
+  - the `break` became `if after is None: break`;
+  - the dedup key is `(versionId, validTo)` on both sides;
+  - `known_keys` builds a fresh set per type;
+  - rows are labelled with `config_key`;
+  - only `TransientError` is retried, and exhaustion raises a `TransientError` with its cause;
+  - an extra `except Exception` per type;
+  - the secret is read from the environment and the token is no longer logged.
 
 **What the AI proposed that I rejected or changed, and why**
--
+- The AI flagged that a security review would put the leaked secret first. I placed it fourth: the ranking is about production data impact, and the fix is one line plus a secret rotation, with no damage to BRONZE.
+- I checked these and left them unchanged:
+  - **Drafts are loaded** (`v-006-a`, `v-105-a`): BRONZE stores raw API responses, and filtering belongs in SILVER (`IS_DRAFT`).
+  - **The `lambda` in `fetch_pages`:** it is called immediately inside `with_retry`, so it captures the current `after`.
+  - **`LOADED_AT` format** (`+00:00` here, `Z` in the existing rows): cosmetic; in Snowflake it would be a `TIMESTAMP` set at insert.
 
 **How I verified the result**
--
+- **Unchanged run:** 3 pages, 10 read, 7 appended; BRONZE 6 → 13 (persons 7, organizations 5, hull 1). The token was printed, and claims was retried 3 times.
+- **Expected numbers, derived by hand from the fixtures:**
+  - the API serves 19 versions;
+  - 4 are unchanged (`v-001-a`, `v-003-a`, `v-042-a`, `v-101-a`);
+  - 2 were closed since they were loaded (`v-002-a` and `v-043-a`, whose `validTo` changed from NULL to a date);
+  - 13 are new.
+  - That gives 15 appended and 4 skipped, and BRONZE 6 → 21 (persons 10, organizations 6, hull 5).
+- **Fixed run:** matches exactly. One WARNING for the 503 on `organizations-p2` followed by success; one ERROR for the claims 422.
+- **Second run on the same BRONZE:** appends 0 (idempotent), and every row has `ENTITY_TYPE == PAYLOAD.configKey`.
+- **The bugs masked each other:**
+  - The shared cache hid the `entityId` dedup bug: `v-043-b` was appended only because organizations were deduped against the persons' keys.
+  - The page-1 `break` hid the retry bug: `organizations-p2` was never requested.
+  - So I verified after all fixes, against the fixture-derived numbers, not fix by fix.
 
 **Open doubts / what I would do with more time**
--
+- **Full scan every night:** the loader always starts at `after=None` and relies on dedup. For large tenants that is many API calls; incremental loading is covered in Part D.
+- **Key loading:** `known_keys` holds all keys of a type in memory. In Snowflake this would be a query on `(VERSION_ID, PAYLOAD:validTo)`, or an anti-join from a staging table.
+- **Data changes without a `validTo` change** are skipped by the agreed dedup key. A payload hash would catch them, if that can happen.
+- **No guard against a looping `nextToken`** (the API repeating a token), which would cause an endless loop.
+- **Exit code:** the run exits 0 even when a type failed. A non-zero exit would let the scheduler alert.
 
 ---
 
@@ -171,62 +214,160 @@ Fill in the Part 1 section before you open Part 2, and leave it as it is afterwa
 **Generated SQL for `articles.clauses` (or the array I chose)** — paste it here:
 
 ```sql
+-- articles.clauses: one row per item of every version, every field typed; PARENT_ITEM_PATH joins the articles item's ITEM_PATH
+CREATE OR REPLACE VIEW SILVER.HULLCARAVANINTERMEDIARY_ARTICLES_CLAUSES AS
+SELECT
+    i.VERSION_ID,
+    i.ITEM_PATH,
+    i.PARENT_ITEM_PATH,
+    i.ITEM_INDEX,
+    i.ITEM:sequenceNumber::NUMBER(38,0)                                    AS SEQUENCE_NUMBER,
+    i.ITEM:number::VARCHAR                                                 AS NUMBER,
+    i.ITEM:version::VARCHAR                                                AS VERSION,
+    i.ITEM:textShort::VARCHAR                                              AS TEXT_SHORT
+FROM SILVER.ENTITY_ARRAY_ITEM AS i
+WHERE i.ENTITY_TYPE = 'hullCaravanIntermediary'
+  AND i.ARRAY_PATH  = 'articles.clauses';
 
+-- and the polymorphic parent (Q2):
+CREATE OR REPLACE VIEW SILVER.HULLCARAVANINTERMEDIARY_ARTICLES AS
+SELECT
+    i.VERSION_ID,
+    i.ITEM_PATH,
+    i.ITEM_INDEX,
+    i.DISCRIMINATOR,
+    i.ITEM:coverageCode::VARCHAR                                           AS COVERAGE_CODE,
+    i.ITEM:netInvoiceAmount::NUMBER(38,8)                                  AS NET_INVOICE_AMOUNT,
+    i.ITEM:taxCode::NUMBER(38,8)                                           AS TAX_CODE,
+    i.ITEM:taxAmount::NUMBER(38,8)                                         AS TAX_AMOUNT,
+    OBJECT_DELETE(i.ITEM::OBJECT, '_discriminator', 'coverageCode', 'netInvoiceAmount', 'taxCode', 'taxAmount', 'clauses') AS VARIANT_FIELDS
+FROM SILVER.ENTITY_ARRAY_ITEM AS i
+WHERE i.ENTITY_TYPE = 'hullCaravanIntermediary'
+  AND i.ARRAY_PATH  = 'articles';
 ```
 
 **How this SQL reflects my Part 1 design** (three lines: object type and version rule, decomposition, polymorphism):
--
--
--
+- **Object type and version rule:** a `VIEW`, as in the Q3 pilot (views + mixed). It keeps every version; the version rule lives in the generated tier-1 view `ENTITY_VERSION`: latest `LOADED_AT` per `VERSION_ID`, then `IS_CURRENT` = not a draft (`isDraft` or `currentState = 'draft'`), in effect now, and the latest `validFrom` (then `versionTag`, `createdAt`, `versionId`). The chain back to BRONZE is `ENTITY_ARRAY_ITEM` (`LATERAL FLATTEN`) ← `ENTITY_VERSION` ← `BRONZE.ENTITIES_RAW.PAYLOAD`.
+- **Decomposition:** each array path gets its own typed view over the generic `ENTITY_ARRAY_ITEM`, keyed on (`VERSION_ID`, `ITEM_PATH`). The nested clauses link to their article through `PARENT_ITEM_PATH = 'articles[0]'`, not through `sequenceNumber`.
+- **Polymorphism (Q2):** `DISCRIMINATOR` column; the union view types the fields shared by all variants plus entity references, and the rest stays in `VARIANT_FIELDS`. There is one fully typed view per variant (`..._ARTICLES__HULL` with `SUM_INSURED`). For hull caravan that gives 1 root + 7 array + 6 variant views = 14, as stated in Part 1.
 
 **Why I chose these test cases**
--
+1. **Two-hop `$ref` alias chain** (the `persons.bankAccounts` shape): the case most likely to be missed by checking only one level of `$ref`. The test also checks that `jet://` refs are left unchanged.
+2. **Cycles:** an alias loop `a → b → a` must raise a clear error, and a self-referencing tree (`node.children` → `node`) must be recorded once and terminate. Recursion without a guard is the classic walker bug.
+3. **Arrays behind objects:**
+   - an array behind an object, with and without `"type": "object"`, must get the same dotted path;
+   - an array inside an object inside an array item must have that item's array as `parent_array` and appear in its `nested_arrays`.
+
+   The readme calls out both.
+4. **Polymorphic merge:**
+   - two variants share a field name with different types (first wins, no crash);
+   - a non-object variant is skipped;
+   - an array that exists in only one variant is still found.
+5. **Negatives:** scalar items, an `anyOf` of scalars, a `oneOf` code list on a scalar, and empty properties must not be reported as arrays of objects.
+6. **Generator:** a field with conflicting types across variants must stay out of the union view (it is in `VARIANT_FIELDS`) and be typed in the variant view. That checks my Q2 rule rather than just the walker.
 
 **What the AI proposed that I rejected or changed, and why**
--
+- **Version rule:** the AI copied Part 1's tier-1 version rule unchanged. Checking it against the data for Part D Q6, I had two things changed:
+  - **drafts:** `isDraft` or `currentState = 'draft'`, so `v-006-a` is no longer current;
+  - **tie-breaker:** `VALID_FROM`, then `VERSION_TAG`, `CREATED_AT`, `VERSION_ID`, because a tie between person or organization versions was a random pick.
+
+  Re-ran the script afterwards: 6 tests ok, 16 statements.
+- **SQL in Python strings:** I questioned it. I kept it for the take-home and recorded it under open doubts.
 
 **How I verified the result**
--
+- **Hand count from `schemas.json`:** 4 configurations with properties, 11 array-of-object paths, 1 scalar array. Persons has 3 arrays (`addresses`, `profiles`, `bankAccounts` via the alias chain), organizations 1 plus scalar array `tradeNames`, hull caravan 7, bl055 0. The printed totals match.
+- **Discovery details:**
+  - `articles.clauses` has parent `articles`;
+  - `controlData.scheduledFinancialTransaction` is reported under its dotted path with no parent;
+  - `bankAccounts` fields are `iban`, `bic` and `accountHolderName`, which proves the two-hop chain is resolved.
+- **Against Part 1:** the generated `..._ARTICLES` union view has the same shared columns and the same `OBJECT_DELETE` key list as the hand-written Part 1 DDL. The tier-1 views are a copy of Part 1 with two deliberate fixes, found while answering Part D Q6:
+  - **drafts:** `isDraft` **or** `currentState = 'draft'`, because person and organization wrappers have no `isDraft` and `v-006-a` would otherwise count as current;
+  - **tie-breaker:** `VALID_FROM` first, then `VERSION_TAG`, because persons and organizations have no `versionTag`; `CREATED_AT` and `VERSION_ID` last, so a tie never gives a random pick.
+
+  Part 1 is left as submitted.
+- All 6 tests pass. Not run on Snowflake.
 
 **Open doubts / what I would do with more time**
--
+- **Generated SQL never executed.** The `FLATTEN` `PATH` format and `REGEXP_SUBSTR(..., 'e')` in `ENTITY_ARRAY_ITEM` are untested.
+- **Single-variant arrays** (`subjects`): the union view types every field and `VARIANT_FIELDS` becomes an empty object, which is redundant next to `__CARAVAN`.
+- **Not generated in Part B:**
+  - the column `COMMENT`s from schema `title`;
+  - `CONFIG_FIELD` / `CODE_LIST` rows;
+  - `ENTITY_EXTRA_FIELD`.
+
+  All three are in the Part 1 design and were left out to keep Part B to the required scope.
+- **Unquoted identifiers:** a field named like a Snowflake reserved word (e.g. `start`) would need a quoted column name.
+- **SQL inside Python strings:** the fixed tier-1 SQL lives in Python string constants. In production I would keep it in `.sql` files (or dbt models) and keep only the generated part in Python, so the SQL can be linted and reviewed as SQL.
 
 ---
 
 ## Part C — SQL
 
 **What I did**
--
+- **Q1:** group BRONZE per (`ENTITY_TYPE`, `VERSION_ID`) and keep versions with more than one distinct `validTo`; return the load count, the distinct `validTo` values as an array, and the first and last `LOADED_AT`.
+  - An open `validTo` is mapped to `'open'` before aggregating, because `COUNT(DISTINCT)` and `ARRAY_AGG` skip NULL.
+  - `validTo` goes through `TIMESTAMP_NTZ` first, so two string formats of the same instant count as one value.
+- **Q2:**
+  - a catalogue `CUSTOM_ATTRIBUTE` (per entity type: JSON path, column name, data type);
+  - a value table `ENTITY_ATTRIBUTE_VALUE` keyed on (`VERSION_ID`, `ATTRIBUTE_ID`), filled insert-only from Part 1's `ENTITY_EXTRA_FIELD`;
+  - a pivot over `SILVER.PERSONS` (current version) using `MAX(IFF(...))` per attribute.
 
 **What the AI proposed that I rejected or changed, and why**
--
+- Nothing rejected. I accepted it after checking that Q1 returns exactly `v-002-a` and `v-043-a` on the loaded fixture data (see below).
 
 **How I verified the result**
--
+- **Q1 expected result:** I simulated it in Python on the BRONZE rows produced by the fixed Part A loader. Grouping per version gives exactly `v-002-a` (persons: 2 loads, `2026-06-30` and open) and `v-043-a` (organizations: 2 loads, `2026-03-31` and open), the two versions closed after their first load.
+- **Q2 against Part 1:** the value table links to `VERSION_ID` like every SILVER structure, uses the `ENTITY_EXTRA_FIELD` view from Q1a, and the pivot uses the generated `PERSONS` view with `IS_CURRENT`.
+- Not run on Snowflake.
 
 **Open doubts / what I would do with more time**
--
+- **Q1:** if a version is ever re-loaded with a changed `data` but the same `validTo`, this query does not see it. A `HASH(PAYLOAD:data)` comparison would.
+- **Q2:**
+  - The pivot's column list is generated per customer. Snowflake's `PIVOT ... IN (ANY)` is dynamic, but it yields quoted, untyped column names, so I kept conditional aggregation.
+  - Values are attached per version, so the pivot shows the custom attributes of the person's *current* version. If an attribute is only set on an older version, it is not shown.
+  - Custom fields that do not arrive in the payload (e.g. entered in another tool) would need a second loader into the same value table.
 
 ---
 
 ## Part D — Production questions
 
 **What I did**
--
+- Answered each question against my own design rather than in general terms:
+  - **Q1:** where idempotency lives (the loader's dedup key, page-level appends, SILVER rules that ignore load order, GOLD fully rebuilt).
+  - **Q4:** walked the three persons v2.0 changes through tier 1 and tier 2.
+  - **Q6:** listed the Part 1 details the Part 2 data proved wrong.
+- Added one example from my own work where I had one: dbt `delete+insert`, Airflow `.expand()`, a dbt source rename, reconciliation checks during an Oracle → Snowflake migration.
 
 **What the AI proposed that I rejected or changed, and why**
--
+- **Q1:** I asked which code actually makes the loader idempotent.
+  - Only the dedup key is implemented: `known_keys`, `dedup_key`, the skip, and `seen.add`.
+  - All-or-nothing per page is a Snowflake proposal, not in the code, and the answer says so.
+  - Two runs at the same time are prevented only by `max_active_runs=1`.
+- **Q6:** I didn't leave findings 1–2 as text only. I had them applied in the Part B generator and left Part 1 as submitted.
 
 **How I verified the result** (which answers you checked against the sample data or the code)
--
+- **Q4:** `v-004-a` in `api-pages.json` really has `houseLetter: "B"`, so a cast to `NUMBER` would fail on existing data.
+- **Q5:**
+  - `ctr-103`'s hull article has `"clauses": []`;
+  - the loaded fixtures contain exactly 3 article clauses (`v-101-a`, `v-102-a`, `v-104-a`);
+  - `v-002-a` and `v-043-a` are re-loaded, `v-105-a` and `v-006-a` are drafts.
+- **Q6:**
+  - person and organization wrappers in `api-pages.json` have no `isDraft` and no `versionTag` (only contracts do);
+  - `organizations.tradeNames` is a scalar array;
+  - `ctr-102` references `v-002-a`.
+- **Q1:** the Part A loader's second run appends 0.
 
 **Open doubts / what I would do with more time**
--
+- **Q6 findings 1 and 2** (draft detection, tie-breaker) are real gaps in the SQL I submitted in Part 1. I fixed them in the Part B generator's tier-1 SQL and left Part 1 as submitted.
+- **Q2:** whether the keyset is ordered by creation is an assumption; it decides whether the "last token" shortcut is safe at all.
+- **GDPR:** a right-to-erasure request conflicts with "nothing in BRONZE is ever deleted". That needs a separate, audited purge process.
 
 ---
 
 ## Part 2 overall
 
-**Time spent on Part 2:**
+**Time spent on Part 2:** 3h
 **Assumptions I made:**
--
+- Every change gets a new `versionId`; an existing version only changes its `validTo` (readme). That is why the dedup key is (`versionId`, `validTo`).
+- The API's keyset pagination is ordered by creation.
+- None of the SQL was run on Snowflake; it is written from documentation.

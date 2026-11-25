@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -47,7 +48,7 @@ log = logging.getLogger("bronze-loader")
 CONFIG = {
     "base_url": "https://api.example-tenant.anva6.local",
     "client_id": "dataplatform-loader",
-    "client_secret": "s3cr3t-do-not-log-8f1c9d",
+    "client_secret": os.environ.get("ANVA6_CLIENT_SECRET", ""),  # FIX: secret from the environment, not from source control
     "config_keys": ["persons", "organizations", "hullCaravanIntermediary", "claims"],
     "page_size": 100,
     "max_attempts": 3,
@@ -117,30 +118,32 @@ def with_retry(fn, what: str, max_attempts: int):
     for attempt in range(1, max_attempts + 1):
         try:
             return fn()
-        except PermanentError as exc:
+        # FIX: retry only transient errors; a PermanentError now propagates at once and is logged once by the caller
+        except TransientError as exc:
+            if attempt == max_attempts:
+                # FIX: give up as a TransientError with the cause, instead of relabelling it as permanent
+                raise TransientError(f"{what} failed after {max_attempts} attempts: {exc}") from exc
             wait = 2 ** (attempt - 1)
             log.warning("%s failed (attempt %d/%d): %s - retrying in %ds (simulated)",
                         what, attempt, max_attempts, exc, wait)
             # time.sleep(wait) in the real loader; simulated here
-    raise PermanentError(f"{what} failed after {max_attempts} attempts")
 
 
 # --- dedup ------------------------------------------------------------------
 
-def known_keys(bronze: list, entity_type: str, cache: set = set()) -> set:
-    """Return the dedup keys already present in bronze for this entity type.
-
-    Cached so that we scan the bronze table only once per entity type.
-    """
-    if not cache:
-        for row in bronze:
-            if row["ENTITY_TYPE"] == entity_type:
-                cache.add((row["ENTITY_KEY"], row["PAYLOAD"].get("validTo")))
-    return cache
+# FIX: no mutable default cache - it kept the keys of the first entity type and reused them for every other type
+def known_keys(bronze: list, entity_type: str) -> set:
+    """Return the dedup keys already present in bronze for this entity type (one scan per type)."""
+    return {
+        (row["VERSION_ID"], row["PAYLOAD"].get("validTo"))  # FIX: dedup on VERSION_ID, not ENTITY_KEY
+        for row in bronze
+        if row["ENTITY_TYPE"] == entity_type
+    }
 
 
 def dedup_key(wrapper: dict) -> tuple:
-    return (wrapper["entityId"], wrapper.get("validTo"))
+    # FIX: the rule is (VERSION_ID, validTo); entityId made a new version collide with an older version of the same entity
+    return (wrapper["versionId"], wrapper.get("validTo"))
 
 
 # --- loader -----------------------------------------------------------------
@@ -153,7 +156,8 @@ def fetch_pages(api: FakeApi, entity_type: str, max_attempts: int):
                           f"GET {entity_type} after={after}", max_attempts)
         yield page
         after = page.get("nextToken")
-        break
+        if after is None:  # FIX: follow nextToken to the last page; the unconditional break stopped after page 1
+            break
 
 
 def to_bronze_row(wrapper: dict, entity_type: str, loaded_at: str) -> dict:
@@ -170,8 +174,7 @@ def load_entities(api: FakeApi, config_keys: list, bronze: list, max_attempts: i
     """Load every configured entity type into bronze. Returns a summary per type."""
     loaded_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     summary = {}
-    entity_type = config_keys[0]
-    log.info("Run started at %s, first entity type: %s", loaded_at, entity_type)
+    log.info("Run started at %s for %s", loaded_at, config_keys)
 
     for config_key in config_keys:
         stats = {"pages": 0, "read": 0, "appended": 0, "skipped": 0, "errors": 0}
@@ -186,14 +189,18 @@ def load_entities(api: FakeApi, config_keys: list, bronze: list, max_attempts: i
                     if key in seen:
                         stats["skipped"] += 1
                         continue
-                    bronze.append(to_bronze_row(wrapper, entity_type, loaded_at))
+                    # FIX: label the row with the type being loaded; entity_type lagged one type behind
+                    bronze.append(to_bronze_row(wrapper, config_key, loaded_at))
                     seen.add(key)
                     stats["appended"] += 1
         except (TransientError, PermanentError) as exc:
             stats["errors"] += 1
             log.error("%s: giving up on this entity type: %s", config_key, exc)
+        # FIX: any other error (e.g. a wrapper without versionId) must not stop the remaining entity types
+        except Exception:
+            stats["errors"] += 1
+            log.exception("%s: unexpected error, giving up on this entity type", config_key)
         log.info("%s done: %s", config_key, stats)
-        entity_type = config_key
 
     return summary
 
@@ -221,7 +228,7 @@ if __name__ == "__main__":
     data_dir = Path(__file__).resolve().parent.parent / "data"
 
     token = f"Bearer {CONFIG['client_id']}:{CONFIG['client_secret']}"
-    log.info("Connecting to %s as %s with token %s", CONFIG["base_url"], CONFIG["client_id"], token)
+    log.info("Connecting to %s as %s", CONFIG["base_url"], CONFIG["client_id"])  # FIX: never log the token, it contains the secret
 
     api = build_api(data_dir / "api-pages.json", token)
     bronze = json.loads((data_dir / "bronze-existing.json").read_text())
